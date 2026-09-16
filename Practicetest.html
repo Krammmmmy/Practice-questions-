@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethics & Morality Practice Examination</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --correct-bg: #dcfce7;
+      --correct-border: #22c55e;
+      --incorrect-bg: #fee2e2;
+      --incorrect-border: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 60px; }
+
+    header { background: var(--primary); color: white; padding: 2rem 1rem; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    header p { opacity: 0.9; font-size: 0.95rem; }
+
+    .progress-bar-container { background: rgba(255,255,255,0.2); height: 8px; width: 100%; max-width: 600px; margin: 1rem auto 0; border-radius: 4px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0%; background: #60a5fa; transition: width 0.3s ease; }
+
+    main { max-width: 850px; margin: 2rem auto; padding: 0 1rem; }
+
+    .score-banner { display: none; background: var(--card-bg); border: 2px solid var(--primary-light); border-radius: 12px; padding: 1.5rem; text-align: center; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .score-banner h2 { font-size: 2rem; color: var(--primary); margin-bottom: 0.5rem; }
+    .score-details { font-size: 1.1rem; color: var(--text-muted); }
+
+    .section-title { background: #e0e7ff; color: var(--primary); padding: 0.75rem 1rem; border-radius: 8px; font-size: 1.25rem; font-weight: 700; margin: 2rem 0 1rem 0; border-left: 5px solid var(--primary); }
+
+    .question-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; transition: border-color 0.2s ease; }
+    .question-card.answered { border-color: var(--primary-light); }
+    .question-card.is-correct { background-color: var(--correct-bg); border-color: var(--correct-border); }
+    .question-card.is-incorrect { background-color: var(--incorrect-bg); border-color: var(--incorrect-border); }
+
+    .question-text { font-weight: 600; margin-bottom: 1rem; font-size: 1.05rem; }
+    .question-num { color: var(--primary-light); margin-right: 0.5rem; }
+
+    .options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .option-label { display: flex; align-items: center; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: background 0.15s ease; }
+    .option-label:hover { background-color: #f1f5f9; }
+    .option-label input { margin-right: 0.75rem; accent-color: var(--primary); }
+
+    .text-input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    .text-input:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+    .feedback { display: none; margin-top: 1rem; padding: 0.75rem; border-radius: 6px; font-size: 0.95rem; line-height: 1.5; }
+    .feedback.visible { display: block; background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.05); }
+
+    .controls { text-align: center; margin-top: 2rem; }
+    .btn { background: var(--primary); color: white; border: none; padding: 0.9rem 2rem; font-size: 1.1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; }
+    .btn:hover { background: var(--primary-light); }
+    .btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Ethics & Morality Practice Exam</h1>
+    <p>Comprehensive 60-Question Interactive Assessment <br> (AI Generated)</p>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div style="margin-top:0.5rem; font-size:0.85rem;" id="progressText">0 of 60 Answered</div>
+  </header>
+
+  <main>
+    <div class="score-banner" id="scoreBanner">
+      <h2 id="scoreTitle">Score: 0 / 60</h2>
+      <p class="score-details" id="scoreDetails">Complete all questions to see your results.</p>
+    </div>
+
+    <form id="quizForm">
+      <div class="section-title">Part I: Multiple Choice Questions (1–20)</div>
+      <div id="part1Container"></div>
+
+      <div class="section-title">Part II: True or False Questions (21–40)</div>
+      <div id="part2Container"></div>
+
+      <div class="section-title">Part III: Identification Questions (41–60)</div>
+      <div id="part3Container"></div>
+
+      <div class="controls">
+        <button type="button" class="btn" id="submitBtn" onclick="submitExam()">Submit Exam & Calculate Score</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const questions = [
+      // Part I: MC (1-20)
+      { id: 1, type: 'mc', text: 'What is the Greek root of the word "ethics," and what does it mean?', options: ['A. Nomos – meaning law or formal rule', 'B. Ethos – meaning custom, habit, character, or disposition', 'C. Logos – meaning logic, reason, or speech', 'D. Sophia – meaning wisdom and moral knowledge'], answer: 'B', exp: 'Ethics stems from the Greek word ethos, which emphasizes character and habitual good conduct[span_0](start_span)[span_0](end_span)[span_1](start_span)[span_1](end_span).' },
+      { id: 2, type: 'mc', text: 'How do ethical principles primarily differ from legal rules?', options: ['A. Ethics are enforced by government sanctions, whereas laws appeal to personal opinion.', 'B. Ethics are applicable only in academic settings, whereas laws apply to all citizens.', 'C. Ethics primarily appeal to an individual\'s conscience, whereas laws regulate external behavior.', 'D. Laws are based on moral reasoning, whereas ethics rely strictly on statutory codes.'], answer: 'C', exp: 'Laws regulate external behavior through statutory enforcement, whereas ethics focuses on internal values and conscience[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span).' },
+      { id: 3, type: 'mc', text: 'A student studies why certain actions are considered morally right or wrong at a foundational level. Which area of ethics is this student exploring?', options: ['A. Applied Ethics', 'B. Descriptive Ethics', 'C. Practical Ethics', 'D. Theoretical Ethics'], answer: 'D', exp: 'Theoretical ethics seeks to understand the underlying foundations of why actions are right or wrong[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span).' },
+      { id: 4, type: 'mc', text: 'An ethics committee evaluates an action by asking, "Why was the action performed?" Which aspect of moral action is being analyzed?', options: ['A. Consequences', 'B. Circumstances', 'C. Intentions', 'D. Character'], answer: 'C', exp: 'Intentions focus on the reason or motive behind performing an action[span_6](start_span)[span_6](end_span)[span_7](start_span)[span_7](end_span).' },
+      { id: 5, type: 'mc', text: 'Which major branch of ethics establishes standards, norms, and principles to determine how people ought to behave?', options: ['A. Normative Ethics', 'B. Meta-Ethics', 'C. Applied Ethics', 'D. Descriptive Ethics'], answer: 'A', exp: 'Normative ethics establishes standards, principles, and rules to guide ethical behavior[span_8](start_span)[span_8](end_span)[span_9](start_span)[span_9](end_span).' },
+      { id: 6, type: 'mc', text: 'A medical board formulates guidelines regarding patient confidentiality and end-of-life care. Which branch of ethics is being utilized?', options: ['A. Meta-Ethics', 'B. Applied Ethics', 'C. Theoretical Ethics', 'D. Conceptual Ethics'], answer: 'B', exp: 'Applied ethics applies ethical principles to real-world practical fields like medicine, business, and engineering[span_10](start_span)[span_10](end_span)[span_11](start_span)[span_11](end_span).' },
+      { id: 7, type: 'mc', text: 'A philosopher investigates questions such as "What does the word \'good\' mean?" and "Can moral claims be objectively proven?" This study falls under:', options: ['A. Applied Ethics', 'B. Normative Ethics', 'C. Meta-Ethics', 'D. Professional Ethics'], answer: 'C', exp: 'Meta-ethics studies the origin, meaning, and logical structure of moral concepts[span_12](start_span)[span_12](end_span)[span_13](start_span)[span_13](end_span).' },
+      { id: 8, type: 'mc', text: 'According to the introductory text, why is ethics considered a "requirement for society"?', options: ['A. It guarantees economic prosperity for all citizens.', 'B. It replaces formal legal systems with moral obligations.', 'C. It promotes trust, cooperation, justice, and social stability.', 'D. It enforces uniform religious beliefs across communities.'], answer: 'C', exp: 'Ethics is essential for society because it fosters trust, cooperation, justice, and social harmony[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span).' },
+      { id: 9, type: 'mc', text: 'Which rationale for ethical behavior is directly reflected in the Golden Rule ("Treat others as you would like to be treated")?', options: ['A. Ethics for Religious Purposes', 'B. Ethics for Self-Interest', 'C. Ethics as a Statutory Requirement', 'D. Ethics of Descriptive Relativism'], answer: 'B', exp: 'Ethics for self-interest recognizes that treating others fairly often produces mutual benefit and positive long-term relationships[span_16](start_span)[span_16](end_span)[span_17](start_span)[span_17](end_span).' },
+      { id: 10, type: 'mc', text: 'What distinguishes Descriptive Morality from Normative Morality?', options: ['A. Descriptive morality prescribes rules; normative morality evaluates human character.', 'B. Descriptive morality observes actual moral practices without judging; normative morality states how people ought to act.', 'C. Descriptive morality applies to individuals; normative morality applies exclusively to institutions.', 'D. Descriptive morality relies on objective facts; normative morality relies on subjective feelings.'], answer: 'B', exp: 'Descriptive morality objectively describes existing moral codes, whereas normative morality prescribes how rational agents ought to act[span_18](start_span)[span_18](end_span).' },
+      { id: 11, type: 'mc', text: 'C.S. Lewis argued that when people quarrel over fairness or justice, they are appealing to a common standard. Which key feature of morality does this support?', options: ['A. Morality is subjective and culturally relative.', 'B. Moral law exists and is recognized by humans.', 'C. Moral standards are created solely by legal authority.', 'D. Morality is based entirely on emotional reactions.'], answer: 'B', exp: 'C.S. Lewis pointed out that moral disputes imply a universally acknowledged shared moral standard[span_19](start_span)[span_19](end_span).' },
+      { id: 12, type: 'mc', text: 'Which statement correctly describes the requirement for moral judgments?', options: ['A. Moral judgments are valid only when endorsed by a government official.', 'B. Moral judgments must be supported by sound logical reasons, not arbitrary opinions.', 'C. Moral judgments must reflect the majority consensus of a given culture.', 'D. Moral judgments should be based strictly on personal preferences and feelings.'], answer: 'B', exp: 'Moral judgments require logical support and ethical justification to avoid being arbitrary[span_20](start_span)[span_20](end_span).' },
+      { id: 13, type: 'mc', text: 'What defines a Moral Agent?', options: ['A. Any human being or animal affected by an ethical decision.', 'B. An individual capable of making moral decisions and being held accountable for them.', 'C. A legal entity or government body tasked with enforcing statutes.', 'D. A person who follows all social etiquettes without questioning them.'], answer: 'B', exp: 'A moral agent has the rational capacity and freedom to choose between actions and accept accountability[span_21](start_span)[span_21](end_span).' },
+      { id: 14, type: 'mc', text: 'Which characteristic enables a moral agent to distinguish right from wrong through logical thinking?', options: ['A. Freedom', 'B. Accountability', 'C. Rationality', 'D. Self-awareness'], answer: 'C', exp: 'Rationality allows a moral agent to exercise reason and distinguish right from wrong[span_22](start_span)[span_22](end_span)[span_23](start_span)[span_23](end_span).' },
+      { id: 15, type: 'mc', text: 'Which of the following is a key characteristic of Moral Standards?', options: ['A. They are established solely by legislative bodies.', 'B. They deal with matters of serious harm or benefit to human welfare.', 'C. They can be ignored whenever personal self-interest is at stake.', 'D. They change completely based on social etiquette and fashion.'], answer: 'B', exp: 'Moral standards govern actions involving human dignity, rights, welfare, and serious harm[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span).' },
+      { id: 16, type: 'mc', text: 'How do moral standards relate to self-interest?', options: ['A. Self-interest always takes priority over moral standards.', 'B. Moral standards take priority over self-interest and personal convenience.', 'C. Moral standards are derived strictly to maximize short-term self-interest.', 'D. Moral standards and self-interest are identical in all circumstances.'], answer: 'B', exp: 'Moral standards override self-interest, personal gain, or convenience[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span).' },
+      { id: 17, type: 'mc', text: 'Which of the following is categorized as a Non-Moral Standard?', options: ['A. Refraining from fraud or theft.', 'B. Respecting human dignity and fundamental rights.', 'C. Table manners and rules of social etiquette.', 'D. Protecting innocent people from arbitrary harm.'], answer: 'C', exp: 'Etiquette and social customs are non-moral standards because they regulate politeness rather than fundamental right/wrong[span_28](start_span)[span_28](end_span)[span_29](start_span)[span_29](end_span).' },
+      { id: 18, type: 'mc', text: 'What constitutes a true Moral Dilemma?', options: ['A. A situation where a person must choose between a moral action and a pleasurable action.', 'B. A scenario with two or more conflicting choices, each supported by moral reasons, where choosing one leads to a moral cost.', 'C. A decision where legal regulations clearly specify the single correct choice.', 'D. A situation where an individual lacks complete information to make a financial choice.'], answer: 'B', exp: 'A moral dilemma occurs when conflicting choices all carry moral justification, ensuring a moral cost regardless of choice[span_30](start_span)[span_30](end_span)[span_31](start_span)[span_31](end_span).' },
+      { id: 19, type: 'mc', text: 'A company executive faces a choice between reporting financial fraud (which may ruin the company\'s reputation) or keeping quiet (violating transparency). This is an example of an:', options: ['A. Individual Moral Dilemma', 'B. Organizational Moral Dilemma', 'C. Etiquette Dilemma', 'D. Aesthetic Dilemma'], answer: 'B', exp: 'Organizational dilemmas deal with ethics affecting institutions, employees, and public accountability[span_32](start_span)[span_32](end_span)[span_33](start_span)[span_33](end_span).' },
+      { id: 20, type: 'mc', text: 'A conflict resulting from a mismatch between separating specialized tasks and combining them into a cohesive whole within an organization is known as:', options: ['A. Gap vs. Overlap', 'B. Lack of Clarity vs. Lack of Creativity', 'C. Differentiation vs. Integration', 'D. Autonomy vs. Interdependence'], answer: 'C', exp: 'Differentiation vs. Integration is a structural dilemma involving task allocation versus institutional unity[span_34](start_span)[span_34](end_span).' },
+
+      // Part II: TF (21-40)
+      { id: 21, type: 'tf', text: 'Ethics originates from the Latin word moralis, which translates to statutory law.', answer: 'FALSE', exp: 'Ethics comes from the Greek word ethos (meaning custom/character)[span_35](start_span)[span_35](end_span)[span_36](start_span)[span_36](end_span).' },
+      { id: 22, type: 'tf', text: 'Laws primarily regulate external conduct, whereas ethics focuses on internal values and conscience.', answer: 'TRUE', exp: 'Laws enforce external rules, while ethics guides internal conscience and moral reasoning[span_37](start_span)[span_37](end_span).' },
+      { id: 23, type: 'tf', text: 'Applied ethics focuses exclusively on theoretical concepts without addressing practical fields like business or medicine.', answer: 'FALSE', exp: 'Applied ethics directly addresses practical domains including bioethics, business, and engineering[span_38](start_span)[span_38](end_span)[span_39](start_span)[span_39](end_span).' },
+      { id: 24, type: 'tf', text: 'Evaluating an action\'s morality involves looking at intentions, circumstances, consequences, and character.', answer: 'TRUE', exp: 'Ethics evaluates all four factors when assessing moral actions[span_40](start_span)[span_40](end_span)[span_41](start_span)[span_41](end_span).' },
+      { id: 25, type: 'tf', text: 'Meta-ethics seeks to establish concrete moral rules to determine whether specific everyday actions are right or wrong.', answer: 'FALSE', exp: 'Normative ethics sets concrete moral rules; meta-ethics analyzes the meaning and nature of morality itself[span_42](start_span)[span_42](end_span)[span_43](start_span)[span_43](end_span).' },
+      { id: 26, type: 'tf', text: 'Virtues are stable moral qualities that enable individuals to act consistently in morally admirable ways.', answer: 'TRUE', exp: 'Virtues are habitual, stable character traits leading to good conduct[span_44](start_span)[span_44](end_span).' },
+      { id: 27, type: 'tf', text: 'Descriptive morality judges whether a culture\'s beliefs are morally superior to those of another culture.', answer: 'FALSE', exp: 'Descriptive morality objectively observes moral practices without rendering value judgments[span_45](start_span)[span_45](end_span)[span_46](start_span)[span_46](end_span).' },
+      { id: 28, type: 'tf', text: 'According to normative morality, moral standards ought to be followed regardless of whether people actually follow them.', answer: 'TRUE', exp: 'Normative morality sets ideal standards for behavior regardless of actual compliance[span_47](start_span)[span_47](end_span)[span_48](start_span)[span_48](end_span).' },
+      { id: 29, type: 'tf', text: 'Moral judgments do not require logical reasoning as long as they are backed by strong personal emotions.', answer: 'FALSE', exp: 'Moral judgments must be grounded in logical reasoning rather than raw emotion[span_49](start_span)[span_49](end_span).' },
+      { id: 30, type: 'tf', text: 'Objective morality implies that certain acts (e.g., torture, murder of innocents) are wrong regardless of societal opinion.', answer: 'TRUE', exp: 'Objective morality holds that core moral truths apply universally[span_50](start_span)[span_50](end_span).' },
+      { id: 31, type: 'tf', text: 'A moral agent acts purely on natural instinct without exercising free choice or rational thought.', answer: 'FALSE', exp: 'Moral agency explicitly requires rationality, self-awareness, and free choice[span_51](start_span)[span_51](end_span)[span_52](start_span)[span_52](end_span).' },
+      { id: 32, type: 'tf', text: 'Moral agency requires both the freedom to choose among alternatives and the capacity for rational thought.', answer: 'TRUE', exp: 'Freedom and rationality are fundamental prerequisites for moral agency[span_53](start_span)[span_53](end_span)[span_54](start_span)[span_54](end_span).' },
+      { id: 33, type: 'tf', text: 'Moral standards are valid only if they are officially enacted into law by a governing body.', answer: 'FALSE', exp: 'Moral standards are grounded in reason and human dignity, independent of legal enactment[span_55](start_span)[span_55](end_span)[span_56](start_span)[span_56](end_span).' },
+      { id: 34, type: 'tf', text: 'Non-moral standards include rules of etiquette, sports rules, and professional codes of conduct.', answer: 'TRUE', exp: 'Non-moral standards govern social conventions, etiquette, and procedural rules[span_57](start_span)[span_57](end_span)[span_58](start_span)[span_58](end_span).' },
+      { id: 35, type: 'tf', text: 'Violating a non-moral standard is automatically a severe moral offense.', answer: 'FALSE', exp: 'Breaching a non-moral rule (e.g., poor etiquette) is inappropriate or impolite, but not inherently immoral[span_59](start_span)[span_59](end_span)[span_60](start_span)[span_60](end_span).' },
+      { id: 36, type: 'tf', text: 'Family, education, religion, culture, and critical reflection all play a role in developing an individual\'s moral standards.', answer: 'TRUE', exp: 'Moral standards are developed through social institutions, upbringing, and critical reflection[span_61](start_span)[span_61](end_span)[span_62](start_span)[span_62](end_span).' },
+      { id: 37, type: 'tf', text: 'A situation is considered a moral dilemma even if there is only one clear and morally acceptable choice available.', answer: 'FALSE', exp: 'A moral dilemma requires at least two conflicting actions supported by moral reasons[span_63](start_span)[span_63](end_span)[span_64](start_span)[span_64](end_span).' },
+      { id: 38, type: 'tf', text: 'Organizational moral dilemmas deal with issues such as toxic workplace culture, leadership ethics, and discrimination.', answer: 'TRUE', exp: 'Organizational dilemmas emerge from institutional practices, leadership, and policies[span_65](start_span)[span_65](end_span)[span_66](start_span)[span_66](end_span).' },
+      { id: 39, type: 'tf', text: 'Structural moral dilemmas occur primarily due to the malicious intent of a single individual rather than systemic organizational design.', answer: 'FALSE', exp: 'Structural dilemmas result from systemic design flaws and operational friction, not individual malice[span_67](start_span)[span_67](end_span).' },
+      { id: 40, type: 'tf', text: 'Resolving a moral dilemma requires identifying conflicting values, evaluating consequences, and accepting responsibility for the outcome.', answer: 'TRUE', exp: 'Ethical decision-making demands structured analysis of values, impacts, and personal responsibility[span_68](start_span)[span_68](end_span)[span_69](start_span)[span_69](end_span).' },
+
+      // Part III: Identification (41-60)
+      { id: 41, type: 'ident', text: 'The branch of philosophy that systematically studies morality and principles distinguishing right from wrong.', acceptable: ['ethics', 'moral philosophy'], exp: 'Ethics (or moral philosophy) is the systematic study of morality[span_70](start_span)[span_70](end_span)[span_71](start_span)[span_71](end_span).' },
+      { id: 42, type: 'ident', text: 'The four aspects of moral action examined in ethical evaluation.', acceptable: ['intentions, circumstances, consequences, character', 'intentions circumstances consequences character'], exp: 'Moral action evaluates intentions, circumstances, consequences, and character[span_72](start_span)[span_72](end_span)[span_73](start_span)[span_73](end_span).' },
+      { id: 43, type: 'ident', text: 'The major branch of ethics that evaluates actions and formulates rules/principles to determine what is morally right or wrong.', acceptable: ['normative ethics', 'normative'], exp: 'Normative ethics sets standards and norms for behavior[span_74](start_span)[span_74](end_span)[span_75](start_span)[span_75](end_span).' },
+      { id: 44, type: 'ident', text: 'The major branch of ethics that examines the origin, meaning, and logical structure of moral concepts and statements.', acceptable: ['meta-ethics', 'metaethics', 'meta ethics'], exp: 'Meta-ethics investigates moral semantics and foundational meanings[span_76](start_span)[span_76](end_span)[span_77](start_span)[span_77](end_span).' },
+      { id: 45, type: 'ident', text: 'The branch of ethics that applies moral principles to real-world areas such as medicine, engineering, and business.', acceptable: ['applied ethics', 'applied'], exp: 'Applied ethics deals with real-world domains[span_78](start_span)[span_78](end_span)[span_79](start_span)[span_79](end_span).' },
+      { id: 46, type: 'ident', text: 'Stable moral qualities such as courage, wisdom, temperance, and justice that enable consistent good conduct.', acceptable: ['virtues', 'virtue'], exp: 'Virtues are stable habits of moral excellence[span_80](start_span)[span_80](end_span).' },
+      { id: 47, type: 'ident', text: 'The perspective on morality that objectively describes how people actually behave and what moral codes they follow without making value judgments.', acceptable: ['descriptive morality', 'descriptive ethics'], exp: 'Descriptive morality objectively observes actual practices[span_81](start_span)[span_81](end_span)[span_82](start_span)[span_82](end_span).' },
+      { id: 48, type: 'ident', text: 'The standard of morality that specifies how rational human beings SHOULD behave regardless of actual practice or cultural norm.', acceptable: ['normative morality'], exp: 'Normative morality sets ideal standards of human conduct[span_83](start_span)[span_83](end_span)[span_84](start_span)[span_84](end_span).' },
+      { id: 49, type: 'ident', text: 'The philosophical term for an individual who has the capacity to evaluate moral choices, act freely, and accept accountability.', acceptable: ['moral agent', 'a moral agent'], exp: 'A moral agent possesses rationality, freedom, and accountability[span_85](start_span)[span_85](end_span)[span_86](start_span)[span_86](end_span).' },
+      { id: 50, type: 'ident', text: 'The characteristic of a moral agent that refers to being answerable for the consequences of one\'s chosen actions.', acceptable: ['accountability', 'responsibility', 'moral responsibility'], exp: 'Accountability makes a moral agent answerable to praise or blame[span_87](start_span)[span_87](end_span)[span_88](start_span)[span_88](end_span).' },
+      { id: 51, type: 'ident', text: 'Principles concerned with protecting human dignity, advancing justice, preventing harm, and promoting human welfare.', acceptable: ['moral standards', 'moral standard'], exp: 'Moral standards focus on human welfare, rights, and justice[span_89](start_span)[span_89](end_span)[span_90](start_span)[span_90](end_span).' },
+      { id: 52, type: 'ident', text: 'Standards that regulate social behavior, politeness, or technical procedures but are not primarily concerned with right vs. wrong.', acceptable: ['non-moral standards', 'non moral standards'], exp: 'Non-moral standards regulate etiquette, conventions, and procedures[span_91](start_span)[span_91](end_span)[span_92](start_span)[span_92](end_span).' },
+      { id: 53, type: 'ident', text: 'Socially accepted rules of politeness and correct behavior in social settings.', acceptable: ['etiquette'], exp: 'Etiquette comprises socially accepted rules of politeness[span_93](start_span)[span_93](end_span)[span_94](start_span)[span_94](end_span).' },
+      { id: 54, type: 'ident', text: 'A complex situation where an agent must choose between conflicting actions, each backed by moral justifications, resulting in moral cost.', acceptable: ['moral dilemma', 'ethical dilemma'], exp: 'A moral dilemma involves unavoidable conflict between moral duties[span_95](start_span)[span_95](end_span)[span_96](start_span)[span_96](end_span).' },
+      { id: 55, type: 'ident', text: 'The level of moral dilemma occurring when a single person experiences internal conflict between competing moral duties or values.', acceptable: ['individual moral dilemma', 'individual level', 'individual'], exp: 'Individual moral dilemmas occur at the personal decision-making level[span_97](start_span)[span_97](end_span)[span_98](start_span)[span_98](end_span).' },
+      { id: 56, type: 'ident', text: 'The level of moral dilemma involving systemic issues within institutions, such as leadership policies, workplace culture, or discrimination.', acceptable: ['organizational moral dilemma', 'organizational level', 'organizational'], exp: 'Organizational moral dilemmas occur within businesses and institutions[span_99](start_span)[span_99](end_span)[span_100](start_span)[span_100](end_span).' },
+      { id: 57, type: 'ident', text: 'The level of moral dilemma resulting from how authority, roles, and operational relationships are structured within an institution.', acceptable: ['structural moral dilemma', 'structural level', 'structural'], exp: 'Structural dilemmas arise from institutional design friction[span_101](start_span)[span_101](end_span)[span_102](start_span)[span_102](end_span).' },
+      { id: 58, type: 'ident', text: 'The structural dilemma issue where key responsibilities are either missing entirely or duplicated across multiple departments.', acceptable: ['gap vs. overlap', 'gap vs overlap', 'gap versus overlap'], exp: 'Gap vs. Overlap occurs when duties are omitted or duplicated[span_103](start_span)[span_103](end_span).' },
+      { id: 59, type: 'ident', text: 'The structural dilemma tension between giving individual units freedom vs. maintaining strict centralized control.', acceptable: ['excessive autonomy vs. excessive interdependence', 'excessive autonomy vs excessive interdependence', 'autonomy vs interdependence'], exp: 'Autonomy vs. Interdependence balances local freedom against central control[span_104](start_span)[span_104](end_span).' },
+      { id: 60, type: 'ident', text: 'The principle stating that moral decisions should be fair and not influenced by favoritism, prejudice, or personal bias.', acceptable: ['impartiality', 'fairness'], exp: 'Impartiality requires equal consideration without bias or prejudice[span_105](start_span)[span_105](end_span)[span_106](start_span)[span_106](end_span).' }
+    ];
+
+    const userAnswers = {};
+
+    function initQuiz() {
+      const p1 = document.getElementById('part1Container');
+      const p2 = document.getElementById('part2Container');
+      const p3 = document.getElementById('part3Container');
+
+      questions.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `card-${q.id}`;
+
+        let html = `<div class="question-text"><span class="question-num">Q${q.id}.</span> ${q.text}</div>`;
+
+        if (q.type === 'mc') {
+          html += `<div class="options">`;
+          q.options.forEach(opt => {
+            const letter = opt.charAt(0);
+            html += `
+              <label class="option-label">
+                <input type="radio" name="q${q.id}" value="${letter}" onchange="recordAnswer(${q.id}, '${letter}')">
+                ${opt}
+              </label>`;
+          });
+          html += `</div>`;
+        } else if (q.type === 'tf') {
+          html += `<div class="options">
+            <label class="option-label"><input type="radio" name="q${q.id}" value="TRUE" onchange="recordAnswer(${q.id}, 'TRUE')"> True</label>
+            <label class="option-label"><input type="radio" name="q${q.id}" value="FALSE" onchange="recordAnswer(${q.id}, 'FALSE')"> False</label>
+          </div>`;
+        } else if (q.type === 'ident') {
+          html += `<div>
+            <input type="text" class="text-input" placeholder="Type your answer here..." oninput="recordAnswer(${q.id}, this.value.trim())">
+          </div>`;
+        }
+
+        html += `<div class="feedback" id="feedback-${q.id}"></div>`;
+        card.innerHTML = html;
+
+        if (q.id <= 20) p1.appendChild(card);
+        else if (q.id <= 40) p2.appendChild(card);
+        else p3.appendChild(card);
+      });
+    }
+
+    function recordAnswer(id, val) {
+      if (val !== '') {
+        userAnswers[id] = val;
+        document.getElementById(`card-${id}`).classList.add('answered');
+      } else {
+        delete userAnswers[id];
+        document.getElementById(`card-${id}`).classList.remove('answered');
+      }
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const count = Object.keys(userAnswers).length;
+      const pct = (count / 60) * 100;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressText').textContent = `${count} of 60 Answered`;
+    }
+
+    function submitExam() {
+      const count = Object.keys(userAnswers).length;
+      if (count < 60) {
+        if (!confirm(`You have only answered ${count} out of 60 questions. Are you sure you want to submit?`)) {
+          return;
+        }
+      }
+
+      let score = 0;
+
+      questions.forEach(q => {
+        const card = document.getElementById(`card-${q.id}`);
+        const fb = document.getElementById(`feedback-${q.id}`);
+        const userVal = userAnswers[q.id];
+        let isCorrect = false;
+
+        if (q.type === 'mc' || q.type === 'tf') {
+          isCorrect = (userVal === q.answer);
+        } else if (q.type === 'ident') {
+          if (userVal) {
+            const cleanVal = userVal.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+            isCorrect = q.acceptable.some(acc => cleanVal === acc.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim());
+          }
+        }
+
+        card.classList.remove('is-correct', 'is-incorrect');
+        fb.classList.add('visible');
+
+        if (isCorrect) {
+          score++;
+          card.classList.add('is-correct');
+          fb.innerHTML = `<strong>Correct!</strong> ${q.exp}`;
+        } else {
+          card.classList.add('is-incorrect');
+          const correctText = q.type === 'ident' ? q.acceptable[0] : q.answer;
+          fb.innerHTML = `<strong>Incorrect.</strong> Correct answer: <strong>${correctText}</strong>.<br>${q.exp}`;
+        }
+      });
+
+      const pct = Math.round((score / 60) * 100);
+      const banner = document.getElementById('scoreBanner');
+      banner.style.display = 'block';
+      document.getElementById('scoreTitle').textContent = `Final Score: ${score} / 60 (${pct}%)`;
+      document.getElementById('scoreDetails').textContent = score >= 45 ? 'Outstanding achievement! Excellent mastery of Ethics & Morality.' : 'Good effort! Review the detailed feedback below to strengthen your understanding.';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onload = initQuiz;
+  </script>
+</body>
+</html>
